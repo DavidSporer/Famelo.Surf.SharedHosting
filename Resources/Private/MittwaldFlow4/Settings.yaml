@@ -1,0 +1,4 @@
+Neos:
+  Flow:
+    core:
+      phpBinaryPathAndFilename: '/usr/local/bin/php_cli'

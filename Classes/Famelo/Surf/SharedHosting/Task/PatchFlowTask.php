@@ -34,16 +34,25 @@ class PatchFlowTask extends BaseTask {
 		parent::execute($node, $application, $deployment, $options);
 
 		$settings = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->resourcePath . '/Settings.yaml'));
-		if (isset($settings['TYPO3']['Flow']['core']['phpBinaryPathAndFilename']) || isset($settings['Neos']['Flow']['core']['phpBinaryPathAndFilename'])) {
+		if (isset($settings['TYPO3']['Flow']['core']['phpBinaryPathAndFilename'])) {
 			$lines = file(FLOW_PATH_ROOT . '/flow');
 			$lines[0] = '#!' . $settings['TYPO3']['Flow']['core']['phpBinaryPathAndFilename'];
 
 			$source = $this->temporaryPath . '/flow';
 			file_put_contents($source, implode("\n", $lines));
 
-			if(isset($settings['Neos']['Flow']['core']['phpBinaryPathAndFilename'])) {
-				file_put_contents($source, str_replace('TYPO3', 'Neos', file_get_contents($source)));
-			}
+			$destination = $deployment->getApplicationReleasePath($application) . '/flow';
+
+			$this->copy($source, $destination);
+		}
+
+		if(isset($settings['Neos']['Flow']['core']['phpBinaryPathAndFilename'])) {
+			$lines = file(FLOW_PATH_ROOT . '/flow');
+			$lines[0] = '#!' . $settings['Neos']['Flow']['core']['phpBinaryPathAndFilename'];
+
+			$source = $this->temporaryPath . '/flow';
+			file_put_contents($source, implode("\n", $lines));
+			file_put_contents($source, str_replace('TYPO3', 'Neos', file_get_contents($source)));
 
 			$destination = $deployment->getApplicationReleasePath($application) . '/flow';
 
